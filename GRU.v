@@ -1,5 +1,0 @@
-module GRU ();
-    
-    
-
-endmodule
