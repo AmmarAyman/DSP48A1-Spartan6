@@ -2,7 +2,7 @@ module GRMU (clk, rst, ce, in, out); // The Mux and Register Unit
 
     parameter R_NO_R = 1;
     parameter WIDTH = 18;
-    parameter string RSTTYPE = "SYNC";
+    parameter RSTTYPE = "SYNC";
 
     input clk, rst, ce;
     input [WIDTH-1:0] in;
