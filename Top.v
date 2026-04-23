@@ -15,9 +15,11 @@ module Top (
     input RSTC,
     input RSTM,
     input CEM,
+    input [47:0] PCIN,
     input [7:0] opcode,
     output [17:0] BCOUT,
     output [35:0] M,
+    output [47:0] PCOUT,
     output [47:0] P
 );
 
@@ -88,5 +90,26 @@ module Top (
 
     // The M output 
     assign M = MREG_out;
+
+    // The MUX X 
+    wire [47:0] mux_x_out;
+    wire [47:0] P_internal;
+
+    assign mux_x_out = (opcode[1:0] == 2'b00)? 48'b0:
+                       (opcode[1:0] == 2'b01)? {12'b0, MREG_out}:
+                       (opcode[1:0] == 2'b10)? P_internal:
+                       (opcode[1:0] == 2'b11)? {DREG_out[11:0], A1REG_out, B1REG_out}:
+                       48'b0;
+
+    
+    // The MUX Z
+    wire [47:0] mux_z_out;
+
+    assign mux_z_out = (opcode[3:2] == 2'b00)? 48'b0:
+                       (opcode[3:2] == 2'b01)? PCIN:
+                       (opcode[3:2] == 2'b10)? P_internal:
+                       (opcode[3:2] == 2'b11)? CREG_out:
+                       48'b0;
+
 
 endmodule
