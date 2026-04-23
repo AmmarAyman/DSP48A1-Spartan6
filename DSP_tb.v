@@ -93,7 +93,7 @@ module DSP_tb();
 
         repeat(4) @(negedge clk);
 
-        if (BCOUT == 18'hf && M == 36'h12c && P == 48'h32 && PCOUT == 48'h32 && CARRYOUT == 0 && CARRYOUTF == 0) begin
+        if (BCOUT == 'hf && M == 'h12c && P == 'h32 && PCOUT == 'h32 && CARRYOUT == 0 && CARRYOUTF == 0) begin
             $display("PATH 1 Passed !");
             correct_count = correct_count + 1;
         end else begin
@@ -102,10 +102,77 @@ module DSP_tb();
         end
 
 
+        // Path 2 (2.3)
+        opcode = 8'b00010000;
+
+        A = 20; 
+        B = 10;
+        C = 350;
+        D = 25;
+
+        BCIN = $random;
+        PCIN = $random;
+        CARRYIN = $random;
+
+        repeat(3) @(negedge clk);
+
+        if (BCOUT == 'h23 && M == 'h2bc && P == 0 && PCOUT == 0 && CARRYOUT == 0 && CARRYOUTF == 0) begin
+            $display("PATH 2 Passed !");
+            correct_count = correct_count + 1;
+        end else begin
+            $display("PATH 2 FAIELD !!!: BCOUT=%h, M=%h, P=%h, PCOUT=%h, CARRYOUT=%h, CARRYOUTF=%h", BCOUT, M, P, PCOUT, CARRYOUT, CARRYOUTF);
+            error_count = error_count + 1;
+        end
+
+
+        // Path 3 (2.4)
+        opcode = 8'b00001010;
+        A = 20;
+        B = 10; 
+        C = 350; 
+        D = 25;
+
+        BCIN = $random;
+        PCIN = $random;
+        CARRYIN = $random;
+
+        repeat(3) @(negedge clk);
+
+        if (BCOUT == 'ha && M == 'hc8 && P == 0 && PCOUT == 0 && CARRYOUT == 0 && CARRYOUTF == 0) begin
+            $display("PATH 3 Passed !");
+            correct_count = correct_count + 1;
+        end else begin
+            $display("PATH 3 FAIELD !!!: BCOUT=%h, M=%h, P=%h, PCOUT=%h, CARRYOUT=%h, CARRYOUTF=%h", BCOUT, M, P, PCOUT, CARRYOUT, CARRYOUTF);
+            error_count = error_count + 1;
+        end
+
+
+        // Path 
+        opcode = 8'b10100111;
+
+        A = 5;
+        B = 6;
+        C = 350;
+        D = 25;
+        PCIN = 3000;
+
+        BCIN = $random;
+        CARRYIN = $random;
+
+        repeat(3) @(negedge clk);
+
+        if (BCOUT == 'h6 && M == 'h1e && P == 'hfe6fffec0bb1 && PCOUT == 'hfe6fffec0bb1 && CARRYOUT == 1 && CARRYOUTF == 1) begin
+            $display("PATH 4 Passed !");
+            correct_count = correct_count + 1;
+        end else begin
+            $display("PATH 4 FAIELD !!!: BCOUT=%h, M=%h, P=%h, PCOUT=%h, CARRYOUT=%h, CARRYOUTF=%h", BCOUT, M, P, PCOUT, CARRYOUT, CARRYOUTF);
+        end
+
+
+        $display("END OF SIMULATION: Errors=%0d", error_count);
         $stop;
 
     end
-
-
+    
 
 endmodule
