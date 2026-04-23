@@ -1,7 +1,7 @@
 module add_sub (in1, in2, op, out, carry);
     
     parameter WIDTH = 18;
-    parameter cry = 0;
+    parameter CRY = 0;
 
     input [WIDTH-1:0] in1, in2;
     input op;
@@ -11,7 +11,7 @@ module add_sub (in1, in2, op, out, carry);
 
     generate
         
-        if (!cry) begin
+        if (!CRY) begin
 
             assign out = (op == 0)? (in1 + in2) : (in1 - in2);
             assign carry = 0;            
