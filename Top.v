@@ -15,8 +15,15 @@ module Top (
     input RSTC,
     input RSTM,
     input CEM,
+    input RSTP,
+    input CEP,
+    input CARRYIN,
+    input CECARRYIN,
+    input RSTCARRYIN,
     input [47:0] PCIN,
     input [7:0] opcode,
+    output CARRYOUT,
+    output CARRYOUTF,
     output [17:0] BCOUT,
     output [35:0] M,
     output [47:0] PCOUT,
@@ -30,7 +37,11 @@ module Top (
     parameter A1REG = 1;
     parameter CREG = 1;
     parameter MREG = 1;
+    parameter CARRYINREG = 1;
+    parameter CARRYOUTREG = 1;
+    parameter PREG = 1;
     parameter B_INPUT = "DIRECT";
+    parameter CARRYINSEL = "OPMODE5";
 
     // The First Colum of the Design
 
@@ -62,7 +73,7 @@ module Top (
 
     // The First adder_subtractor
     wire [17:0] add_sub_nc_out;
-    add_sub add_sub_nc (.in1(DREG_out), .in2(B0REG_out), .op(opcode[6]), .out(add_sub_nc_out));
+    add_sub add_sub_nc (.in1(DREG_out), .in2(B0REG_out), .op(opcode[6]), .out(add_sub_nc_out), .cin(1'b0));
 
     // After first add_sub MUX
     wire [17:0] af_as_mux;
@@ -110,6 +121,40 @@ module Top (
                        (opcode[3:2] == 2'b10)? P_internal:
                        (opcode[3:2] == 2'b11)? CREG_out:
                        48'b0;
+
+    
+    // The Carry_in REG
+    wire CIN;
+
+    wire CYI_in;
+    assign CYI_in = (CARRYINSEL == "OPMODE5")? opcode[5] : CARRYIN;
+
+    GRMU #(.WIDTH(1), .R_NO_R(CARRYINREG)) CYIR (.clk(clk), .rst(RSTCARRYIN), .ce(CECARRYIN), .in(CYI_in), .out(CIN));
+
+    
+    // The Second add_sub with carry
+    wire [47:0] add_sub_c_out;
+    wire add_sub_carry;
+
+    add_sub #(.WIDTH(48), .CRY(1)) add_sub_c (.in1(mux_z_out), .in2(mux_x_out), .op(opcode[7]), .out(add_sub_c_out), .cin(CIN), .carry(add_sub_carry));
+
+
+    // The CYO REG
+    wire CYO_out;
+    GRMU #(.WIDTH(1), .R_NO_R(CARRYOUTREG)) CYOR (.clk(clk), .rst(RSTCARRYIN), .ce(CECARRYIN), .in(add_sub_carry), .out(CYO_out));
+
+
+    // The CARRYOUT and CARRYOUTF
+    assign CARRYOUT = CYO_out;
+    assign CARRYOUTF = CYO_out;
+
+
+    // The P REG
+    GRMU #(.WIDTH(48), .R_NO_R(PREG)) PR (.clk(clk), .rst(RSTP), .ce(CEP), .in(add_sub_c_out), .out(P_internal));
+
+    // The P and PCOUT
+    assign P = P_internal;
+    assign PCOUT = P_internal;
 
 
 endmodule
